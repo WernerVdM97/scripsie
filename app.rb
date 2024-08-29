@@ -3,6 +3,7 @@ require 'io/console'
 
 r = Random.new
 
+@block = "\u2588"
 @color_codes = {
   black:   30,
   red:     31,
@@ -31,12 +32,12 @@ end
 # Hide the cursor and clear the screen
 print "\e[?25l\e[H\e[2J"
 
-th, tw = IO.console.winsize
-th = th - 1
+@th, @tw = IO.console.winsize
+@th -= 1
 
 # @mask = Array.new(th) { Array.new(tw, 1) }
 # @pixels = Array.new(th) { Array.new(tw, ' ') }
-@pixels = Array.new(th) { Array.new(tw, colorize("\u2588", :black)) }
+@pixels = Array.new(@th) { Array.new(@tw, colorize(@block, :black)) }
 fps = 5
 
 # Configuration for each window
@@ -64,14 +65,21 @@ def refresh
   print buffer  # Move cursor to home and print buffer
 end
 
+def render(y, x)
+  @pixels[y][x] = colorize(@block, x > @tw/2 ? :red : :blue)
+end
+
 while true
   # clear
-  th, tw = IO.console.winsize
-  th = th - 1
+  @th, @tw = IO.console.winsize
+  @th -= 1
 
-  @pixels[r.rand(th)][r.rand(tw)] = colorize("\u2588", @color_codes.keys.sample)
   # @pixels = @mask * colorize("\u2588",r.rand(7)+30)
-  
+  # @pixels[r.rand(th)][r.rand(tw)] = colorize("\u2588", @color_codes.keys.sample)
+  # @pixels.each { |arr| arr.each_with_index { |x, y| render(x, y) } }
+  # @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(x, y) } }
+   @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(y, x) } }
+ 
   refresh
   sleep 0.01 # (1/fps).round(3)
 end
