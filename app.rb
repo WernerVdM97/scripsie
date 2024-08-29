@@ -67,17 +67,27 @@ end
 
 def render(y, x)
   # @pixels[y][x] = colorize(@block, x > @tw/2 ? :red : :blue)
-  color = if x > @limit*@tw && y > @limit*@th
+  color = if x > @lw*@tw && y > @ly*@th
             :red
-          elsif x > @limit*@tw && y <= @limit*@th
+          elsif x > @lw*@tw && y <= @ly*@th
             :blue
-          elsif x <= @limit*@tw && y > @limit*@th
+          elsif x <= @lw*@tw && y > @ly*@th
             :green
-          elsif x <= @limit*@tw && y <= @limit*@th
+          elsif x <= @lw*@tw && y <= @ly*@th
             :yellow
           end
 
-  @pixels[y][x] = colorize(@block, color) 
+  pixel = if x > @lw*@tw && y > @ly*@th
+            'x' 
+          elsif x > @lw*@tw && y <= @ly*@th
+            '.' 
+          elsif x <= @lw*@tw && y > @ly*@th
+            'o' 
+          elsif x <= @lw*@tw && y <= @ly*@th
+            '+' 
+          end
+
+  @pixels[y][x] = colorize(pixel, color) 
 end
 
 while true
@@ -87,15 +97,16 @@ while true
   @th, @tw = IO.console.winsize
   @th -= 1
 
-  @limit = ((Math.sin(Math::PI*t/10.0)+1)/2.0)
-  # @limit = ((t % 10) / 10.0) * @tw
+  # @lw= ((t % 10) / 10.0) * @tw
+  @lw= ((Math.sin(Math::PI*t/10.0)+1)/2.0)
+  @ly = ((Math.cos(Math::PI*t/10.0)+1)/2.0)
 
   @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(y, x) } }
  
   # @pixels *= @mask
 
   refresh
-  # puts "t: #{t} \tlimit: #{@limit} \tmodulas: #{t % 10}"
+  # puts "t: #{t} \tlimit: #{@lw} \tmodulas: #{t % 10}"
   t += 1
   sleep 0.1 # (1/fps).round(3)
 end
