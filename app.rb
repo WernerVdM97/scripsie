@@ -57,12 +57,22 @@ def clear
   print "\e[H\e[2J" # Clear the screen and reset cursor
 end
 
+# def refresh
+#   buffer = "\e[H" # Move cursor to the top-left (home) position
+#   @pixels.each do |row|
+#     buffer << row.join << "\n"
+#   end
+#   print buffer  # Move cursor to home and print buffer
+# end
 def refresh
-  buffer = "\e[H" # Move cursor to the top-left (home) position
-  @pixels.each do |row|
-    buffer << row.join << "\n"
+  print "\e[H" # Move cursor to the top-left (home) position
+  @pixels.each_with_index do |row, y|
+    row.each_with_index do |pixel, x|
+      print "\e[#{y + 1};#{x + 1}H"  # Move cursor to the specific position
+      print pixel  # Print the pixel
+      sleep 0.001
+    end
   end
-  print buffer  # Move cursor to home and print buffer
 end
 
 def render(y, x)
@@ -87,6 +97,7 @@ def render(y, x)
             '+' 
           end
 
+  pixel = @block if [0,@th-1].include?(y) || [0,@tw-1].include?(x)
   @pixels[y][x] = colorize(pixel, color) 
 end
 
@@ -108,7 +119,7 @@ while true
   refresh
   # puts "t: #{t} \tlimit: #{@lw} \tmodulas: #{t % 10}"
   t += 1
-  sleep 0.1 # (1/fps).round(3)
+  #sleep 2 # (1/fps).round(3)
 end
 
 # Show the cursor again when the script exits
