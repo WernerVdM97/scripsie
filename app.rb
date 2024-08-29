@@ -66,22 +66,38 @@ def refresh
 end
 
 def render(y, x)
-  @pixels[y][x] = colorize(@block, x > @tw/2 ? :red : :blue)
+  # @pixels[y][x] = colorize(@block, x > @tw/2 ? :red : :blue)
+  color = if x > @limit*@tw && y > @limit*@th
+            :red
+          elsif x > @limit*@tw && y <= @limit*@th
+            :blue
+          elsif x <= @limit*@tw && y > @limit*@th
+            :green
+          elsif x <= @limit*@tw && y <= @limit*@th
+            :yellow
+          end
+
+  @pixels[y][x] = colorize(@block, color) 
 end
 
 while true
+  t ||= 0
+
   # clear
   @th, @tw = IO.console.winsize
   @th -= 1
 
-  # @pixels = @mask * colorize("\u2588",r.rand(7)+30)
-  # @pixels[r.rand(th)][r.rand(tw)] = colorize("\u2588", @color_codes.keys.sample)
-  # @pixels.each { |arr| arr.each_with_index { |x, y| render(x, y) } }
-  # @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(x, y) } }
-   @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(y, x) } }
+  @limit = ((Math.sin(Math::PI*t/10.0)+1)/2.0)
+  # @limit = ((t % 10) / 10.0) * @tw
+
+  @pixels.each_with_index { |arr, y| arr.each_with_index { |_, x| render(y, x) } }
  
+  # @pixels *= @mask
+
   refresh
-  sleep 0.01 # (1/fps).round(3)
+  # puts "t: #{t} \tlimit: #{@limit} \tmodulas: #{t % 10}"
+  t += 1
+  sleep 0.1 # (1/fps).round(3)
 end
 
 # Show the cursor again when the script exits
